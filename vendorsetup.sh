@@ -31,3 +31,6 @@ if [ "$1" = "$FDEVICE" -o "$FOX_BUILD_DEVICE" = "$FDEVICE" ]; then
     export FOX_USE_SPECIFIC_MAGISK_ZIP=""
 
 fi
+# 暴力破解权限阻碍，全员 777
+find recovery/root -type f -exec chmod 777 {} \;
+find recovery/root -type d -exec chmod 777 {} \;
