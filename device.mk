@@ -1,35 +1,6 @@
-#
-# Copyright (C) 2021 The LineageOS Project
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
-# Audio configs
+# 只拷贝 Recovery 专用的 fstab
 PRODUCT_COPY_FILES += \
-    $(call find-copy-subdir-files,*,$(LOCAL_PATH)/audio/,$(TARGET_COPY_OUT_VENDOR)/etc)
+    $(LOCAL_PATH)/recovery/root/system/etc/recovery.fstab:$(TARGET_RECOVERY_ROOT_OUT)/system/etc/recovery.fstab
 
-# Overlays
-DEVICE_PACKAGE_OVERLAYS += \
-    $(LOCAL_PATH)/overlay
-
-# Device uses high-density artwork where available
-PRODUCT_AAPT_CONFIG := normal
-PRODUCT_AAPT_PREF_CONFIG := xhdpi
-
-# Boot animation
-TARGET_SCREEN_HEIGHT := 2400
-TARGET_SCREEN_WIDTH := 1080
-
-PRODUCT_SHIPPING_API_LEVEL := 29
-
-# Fingerprint
-TARGET_HAS_FOD := true
-
-# Properties
--include $(LOCAL_PATH)/properties.mk
-
-# Inherit from sm7250-common
-$(call inherit-product, device/xiaomi/sm7250-common/lito.mk)
-
-# Inherit from vendor blobs
-# $(call inherit-product, vendor/xiaomi/vangogh/vangogh-vendor.mk)
+# 注意：recovery/root 目录下的所有文件（如解密库和 rc 脚本），
+# 会被 TWRP/OF 的编译系统自动打包进 ramdisk，无需在这里声明 COPY。

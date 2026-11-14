@@ -1,0 +1,129 @@
+<<<BUNDLE_BEGIN
+<<<FILE path=AndroidProducts.mk codec=text
+PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/twrp_vangogh.mk
+
+COMMON_LUNCH_CHOICES := \
+    twrp_vangogh-eng
+>>>END
+<<<FILE path=twrp_vangogh.mk codec=text
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
+
+# 继承极简 device.mk
+$(call inherit-product, device/xiaomi/vangogh/device.mk)
+
+PRODUCT_DEVICE := vangogh
+PRODUCT_NAME := twrp_vangogh
+PRODUCT_BRAND := Xiaomi
+PRODUCT_MODEL := MI 10 Lite Zoom
+PRODUCT_MANUFACTURER := Xiaomi
+>>>END
+<<<FILE path=device.mk codec=text
+# 只拷贝 Recovery 专用的 fstab
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/root/system/etc/recovery.fstab:$(TARGET_RECOVERY_ROOT_OUT)/system/etc/recovery.fstab
+
+# 注意：recovery/root 目录下的所有文件（如解密库和 rc 脚本），
+# 会被 TWRP/OF 的编译系统自动打包进 ramdisk，无需在这里声明 COPY。
+>>>END
+<<<FILE path=BoardConfig.mk codec=text
+DEVICE_PATH := device/xiaomi/vangogh
+
+# 架构
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_VARIANT := kryo
+
+# 平台
+TARGET_BOARD_PLATFORM := sm7250
+
+# 内核 (如果你在 Actions 中没有配置编译内核，需要把预编译内核放在这里)
+TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/Image.gz-dtb
+
+# Recovery 专属配置
+RECOVERY_VARIANT := orangefox
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
+TARGET_OTA_ASSERT_DEVICE := vangogh
+
+# 屏幕与 UI
+TW_THEME := portrait_hdpi
+TW_SCREEN_WIDTH := 1080
+TW_SCREEN_HEIGHT := 2400
+
+# 核心功能开关 (解密与分区)
+TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_FBE_METADATA_DECRYPT := true
+TW_HAS_FASTBOOTD := true
+TW_INCLUDE_NTFS_3G := true
+TW_HAS_MTP := true
+TW_USE_TOOLBOX := true
+>>>END
+<<<FILE path=vendorsetup.sh codec=text
+#!/bin/bash
+FDEVICE="vangogh"
+if [ "$1" = "$FDEVICE" -o "$FOX_BUILD_DEVICE" = "$FDEVICE" ]; then
+    export OF_MAINTAINER="deepsleep-v3"
+    export OF_SCREEN_H=2400
+    export OF_STATUS_H=69
+    export OF_STATUS_INDENT_LEFT=48
+    export OF_STATUS_INDENT_RIGHT=48
+    export OF_ALLOW_DISABLE_NAVBAR=1
+    export OF_DEFAULT_TIMEZONE="Asia/Shanghai"
+    export OF_QUICK_BACKUP_LIST="/boot;/data;"
+    export OF_USE_GREEN_LED=0
+    export OF_KEEP_DM_VERITY=1
+
+    # 给底层解密库最高权限 (777)
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    find "$SCRIPT_DIR/recovery/root" -type f -exec chmod 777 {} \; 2>/dev/null
+    find "$SCRIPT_DIR/recovery/root" -type d -exec chmod 777 {} \; 2>/dev/null
+fi
+>>>END
+<<<FILE path=recovery/root/system/etc/recovery.fstab codec=text
+# mount point   fstype      device                                          [device2]   [flags]
+/system         ext4        /dev/block/mapper/system
+/vendor         ext4        /dev/block/mapper/vendor
+/product        ext4        /dev/block/mapper/product
+/data           f2fs        /dev/block/bootdevice/by-name/userdata          flags=fileencryption=ice,wrappedkey,inlinecrypt;keydirectory=/metadata/vold/metadata_encryption;latemount,wait,check,quota,formattable
+/cache          ext4        /dev/block/bootdevice/by-name/cache
+/boot           emmc        /dev/block/bootdevice/by-name/boot
+/recovery       emmc        /dev/block/bootdevice/by-name/recovery
+/metadata       ext4        /dev/block/bootdevice/by-name/metadata
+/persist        ext4        /dev/block/bootdevice/by-name/persist
+/misc           emmc        /dev/block/bootdevice/by-name/misc
+/usb-otg        vfat        /dev/block/sda1
+>>>END
+<<<FILE path=recovery/root/system/etc/init/init.recovery.qcom.rc codec=text
+on early-init
+    start qseecomd
+    start vendor.keymaster-4-0
+    start vendor.keymaster-4-1
+    start vendor.gatekeeper-1-0
+
+service qseecomd /vendor/bin/qseecomd
+    class core
+    user root
+    group root system
+    oneshot
+
+service vendor.keymaster-4-0 /vendor/bin/hw/android.hardware.keymaster@4.0-service-qti
+    class hal
+    user system
+    group system
+    oneshot
+
+service vendor.keymaster-4-1 /vendor/bin/hw/android.hardware.keymaster@4.1-service-qti
+    class hal
+    user system
+    group system
+    oneshot
+
+service vendor.gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service-qti
+    class hal
+    user system
+    group system
+    oneshot
+>>>END
+<<<BUNDLE_END
