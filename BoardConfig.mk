@@ -19,6 +19,8 @@ TARGET_OTA_ASSERT_DEVICE := vangogh
 TARGET_NO_RECOVERY := false
 BOARD_USES_RECOVERY_AS_BOOT := false
 BOARD_USES_FULL_RECOVERY_IMAGE := true
+# 告诉系统：老子有独立的 dtbo 分区，别在内核后面找 dtb 了！
+BOARD_KERNEL_SEPARATED_DTBO := true
 
 # 屏幕与 UI
 TW_THEME := portrait_hdpi
