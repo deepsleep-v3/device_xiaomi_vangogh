@@ -34,9 +34,6 @@ TARGET_RECOVERY_ROOT_OUT_SYMLINK_VENDOR := true
 # 2. 限制 Vendor 的拷贝路径，绝对不让它直接写到 root 下
 TARGET_COPY_OUT_VENDOR := system/vendor
 
-# 3. 如果你的 OF 版本支持，禁用 legacy vendor 机制
-BOARD_USES_VENDORIMAGE := true
-
 # 屏幕与 UI
 TW_THEME := portrait_hdpi
 TW_SCREEN_WIDTH := 1080
