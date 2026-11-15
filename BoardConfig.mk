@@ -21,6 +21,14 @@ BOARD_USES_RECOVERY_AS_BOOT := false
 BOARD_USES_FULL_RECOVERY_IMAGE := true
 # 告诉系统：老子有独立的 dtbo 分区，别在内核后面找 dtb 了！
 BOARD_KERNEL_SEPARATED_DTBO := true
+# 告诉 AOSP 你的真实分区大小，这样它才敢打包出 .img！
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 134217728   # 128MB (128 * 1024 * 1024)
+BOARD_BOOTIMAGE_PARTITION_SIZE := 67108864        # 64MB (足够容纳你 46.4MB 的 boot)
+
+# 确保这三个强制开关还在
+TARGET_NO_RECOVERY := false
+BOARD_USES_RECOVERY_AS_BOOT := false
+BOARD_USES_FULL_RECOVERY_IMAGE := true
 
 # 屏幕与 UI
 TW_THEME := portrait_hdpi
