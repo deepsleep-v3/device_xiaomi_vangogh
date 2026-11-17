@@ -30,6 +30,7 @@ BOARD_USES_RECOVERY_AS_BOOT := false
 BOARD_USES_FULL_RECOVERY_IMAGE := true
 # 1. 强制锁定 Vendor 必须作为软链接存在，不许生成实体目录
 TARGET_RECOVERY_ROOT_OUT_SYMLINK_VENDOR := true
+DISABLE_LTO := true
 
 # 2. 限制 Vendor 的拷贝路径，绝对不让它直接写到 root 下
 TARGET_COPY_OUT_VENDOR := system/vendor
